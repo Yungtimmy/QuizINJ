@@ -1,3 +1,4 @@
+require("dotenv").config();
 const TelegramBot = require("node-telegram-bot-api");
 const db = require("./db");
 const config = require("./config");
@@ -80,8 +81,20 @@ bot.onText(/\/start/, (msg) => {
 
 const addSessions = {}; // userId → { step, question, answer }
 
-bot.onText(/\/add(?:@.+)?$/, (msg) => {
+bot.onText(/\/add(?:@.+)?(?:\s+(.+))?$/, (msg, match) => {
   if (!ensurePrivate(msg, "/add") || !isAdmin(msg.from.id)) return;
+
+  const inlineQuestion = match[1] ? match[1].trim() : "";
+  if (inlineQuestion) {
+    addSessions[msg.from.id] = { step: "answer", question: inlineQuestion };
+    return bot.sendMessage(
+      msg.chat.id,
+      `✅ Question saved!
+
+📝 <b>Step 2/2</b> — Type the <b>correct answer</b> (case-insensitive):`,
+      { parse_mode: "HTML" }
+    );
+  }
 
   addSessions[msg.from.id] = { step: "question" };
   bot.sendMessage(
