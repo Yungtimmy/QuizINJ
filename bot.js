@@ -1,4 +1,5 @@
-require("dotenv").config();
+process.once('SIGINT', () => bot.stopPolling());
+process.once('SIGTERM', () => bot.stopPolling());require("dotenv").config();
 const TelegramBot = require("node-telegram-bot-api");
 const db = require("./db");
 const config = require("./config");
