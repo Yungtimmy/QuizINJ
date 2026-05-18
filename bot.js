@@ -28,6 +28,17 @@ function escapeHtml(text) {
     .replace(/>/g, "&gt;");
 }
 
+function ensurePrivate(msg, command) {
+  if (msg.chat.type !== "private") {
+    bot.sendMessage(
+      msg.chat.id,
+      `Please send ${command} to me in a private chat, not the group.`
+    );
+    return false;
+  }
+  return true;
+}
+
 function formatPrizes() {
   return config.PRIZES.map((p, i) => {
     const medals = ["🥇", "🥈", "🥉"];
@@ -69,8 +80,8 @@ bot.onText(/\/start/, (msg) => {
 
 const addSessions = {}; // userId → { step, question, answer }
 
-bot.onText(/\/add$/, (msg) => {
-  if (msg.chat.type !== "private" || !isAdmin(msg.from.id)) return;
+bot.onText(/\/add(?:@.+)?$/, (msg) => {
+  if (!ensurePrivate(msg, "/add") || !isAdmin(msg.from.id)) return;
 
   addSessions[msg.from.id] = { step: "question" };
   bot.sendMessage(
@@ -80,8 +91,8 @@ bot.onText(/\/add$/, (msg) => {
   );
 });
 
-bot.onText(/\/cancel/, (msg) => {
-  if (msg.chat.type !== "private" || !isAdmin(msg.from.id)) return;
+bot.onText(/\/cancel(?:@.+)?$/, (msg) => {
+  if (!ensurePrivate(msg, "/cancel") || !isAdmin(msg.from.id)) return;
   delete addSessions[msg.from.id];
   bot.sendMessage(msg.chat.id, "❌ Cancelled.");
 });
@@ -121,8 +132,8 @@ bot.on("message", (msg) => {
 
 // ─── DM: /list ───────────────────────────────────────────────────────────────
 
-bot.onText(/\/list/, (msg) => {
-  if (msg.chat.type !== "private" || !isAdmin(msg.from.id)) return;
+bot.onText(/\/list(?:@.+)?$/, (msg) => {
+  if (!ensurePrivate(msg, "/list") || !isAdmin(msg.from.id)) return;
 
   const questions = db.getQuestions();
   if (!questions.length) {
@@ -143,8 +154,8 @@ bot.onText(/\/list/, (msg) => {
 
 // ─── DM: /clear ──────────────────────────────────────────────────────────────
 
-bot.onText(/\/clear/, (msg) => {
-  if (msg.chat.type !== "private" || !isAdmin(msg.from.id)) return;
+bot.onText(/\/clear(?:@.+)?$/, (msg) => {
+  if (!ensurePrivate(msg, "/clear") || !isAdmin(msg.from.id)) return;
   db.clearAll();
   bot.sendMessage(msg.chat.id, "🗑️ All questions and scores have been cleared.");
 });
@@ -153,8 +164,8 @@ bot.onText(/\/clear/, (msg) => {
 
 const prizeSessions = {};
 
-bot.onText(/\/setprize/, (msg) => {
-  if (msg.chat.type !== "private" || !isAdmin(msg.from.id)) return;
+bot.onText(/\/setprize(?:@.+)?$/, (msg) => {
+  if (!ensurePrivate(msg, "/setprize") || !isAdmin(msg.from.id)) return;
 
   prizeSessions[msg.from.id] = true;
   bot.sendMessage(
