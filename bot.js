@@ -395,4 +395,14 @@ bot.onText(/\/endgame/, (msg) => {
   );
 });
 
+// ─── Health check server (for UptimeRobot / cron-job.org) ────────────────────
+const http = require("http");
+
+http.createServer((req, res) => {
+  res.writeHead(200);
+  res.end("Bot is alive ✅");
+}).listen(3000, "0.0.0.0", () => {
+  console.log(`🌐 Health server running on 0.0.0.0:3000`);
+});
+
 console.log("🤖 Injective Nigeria Quiz Bot is running...");
